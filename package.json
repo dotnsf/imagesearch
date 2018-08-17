@@ -1,0 +1,22 @@
+{
+    "name": "imagesearch",
+    "version": "0.0.1",
+    "scripts": {
+        "start": "node app.js"
+    },
+    "dependencies": {
+        "basic-auth-connect": "1.0.x",
+        "body-parser": "^1.18.3",
+        "cfenv": "~1.0.0",
+        "cloudant": "1.7.x",
+        "easyimage": "^3.1.0",
+        "ejs": "2.5.5",
+        "express": "4.1.x",
+        "fs": "~0.0.1",
+        "multer": "1.1.x"
+    },
+    "repository": {},
+    "engines": {
+        "node": "4.x"
+    }
+}

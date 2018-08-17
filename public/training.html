@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>Image Search(Training)</title>
+<script type="text/javascript" src="//code.jquery.com/jquery-2.2.4.min.js"></script>
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet"/>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="./cvi_busy_lib.js"></script>
+<script type="text/javascript">
+$(function(){
+  getImages();
+});
+
+function getImages(){
+  $('#tbody').html( '' );
+  var obj = getBusyOverlay( 'viewport', {color:'black', opacity:0.5, text:'loading', style:'text-decoration:blink; font-weight:bold; font-size:12px; color:white;' } );
+  $.ajax({
+    type: 'GET',
+    url: '/images',
+    success: function( result ){
+      //console.log( result );
+      obj.remove();
+      if( result.status ){
+        var docs = result.docs;
+        console.log( docs );
+        docs.forEach( function( doc ){
+          var tr = '<tr>'
+            + '<td><a target="_blank" href="/attachment/' + doc._id + '"><img src="/attachment/' + doc._id + '?key=dst_file"/></a></td>'
+            + '<td>' + doc.filename + '</td>'
+            + '<td>' + timestamp2datetime( doc.timestamp ) + '</td>'
+            + '<td><input type="button" class="btn btn-danger" value="delete" onClick="deleteImage(\'' + doc._id + '\');"/></td>'
+            + '</tr>';
+          $('#tbody').append( tr );
+        });
+      }
+
+      var edittr = '<tr>'
+        + '<td>&nbsp;</td>'
+        + '<td><form id="form1" enctype="multipart/form-data"><input type="file" name="image" id="image"/></form></td>'
+        + '<td>-</td>'
+        + '<td><input type="button" class="btn btn-primary" value="save" onClick="postImage();"/></td>'
+        + '</tr>';
+      $('#tbody').append( edittr );
+    },
+    error: function( jqXHR, textStatus, errorThrown ){
+      console.log( textStatus );
+      console.log( errorThrown );
+      obj.remove();
+    }
+  });
+}
+
+function postImage(){
+  var form = $('#form1').get()[0];
+  var data = new FormData( form );
+
+  $.ajax({
+    type: 'POST',
+    url: '/image',
+    data: data,
+    processData: false,
+    contentType: false,
+    dataType: 'json',
+    success: function( data ){
+      console.log( data );
+      getImages();
+    },
+    error: function( jqXHR, textStatus, errorThrown ){
+      console.log( textStatus );
+      console.log( errorThrown );
+      console.log( 'postImage: error' );
+    }
+  });
+}
+
+function deleteImage(id){
+  if( window.confirm( 'delete ' + id + ' ?' ) ){
+    $.ajax({
+      type: 'DELETE',
+      url: '/image/' + id,
+      success: function( data ){
+        console.log( data );
+        getImages();
+      },
+      error: function( jqXHR, textStatus, errorThrown ){
+        console.log( textStatus );
+        console.log( errorThrown );
+        console.log( 'deleteImage: error' );
+      }
+    });
+  }
+}
+
+function timestamp2datetime( ts ){
+  var dt = new Date( ts );
+  var yyyy = dt.getFullYear();
+  var mm = dt.getMonth() + 1;
+  var dd = dt.getDate();
+  var hh = dt.getHours();
+  var nn = dt.getMinutes();
+  var ss = dt.getSeconds();
+  var datetime = yyyy + '-' + ( mm < 10 ? '0' : '' ) + mm + '-' + ( dd < 10 ? '0' : '' ) + dd
+    + ' ' + ( hh < 10 ? '0' : '' ) + hh + ':' + ( nn < 10 ? '0' : '' ) + nn + ':' + ( ss < 10 ? '0' : '' ) + ss;
+  return datetime;
+}
+
+</script>
+<style type="text/css">
+html{
+  height: 100%;
+}
+
+body{
+  margin: 0;
+  height: 100%;
+}
+
+html, body{
+  text-align: center;
+  background-color: #ffffcc;
+  font-size: 20px;
+  color: #333;
+}
+
+table{
+  background-color: #ccffcc;
+}
+
+#cv{
+  border: 1px solid #333;
+}
+</style>
+</head>
+<body>
+<div>
+<table class="table table-bordered">
+ <thead>
+  <tr><th>#</th><th>Filename</th><th>Timestamp</th><th>Actions</th></tr>
+ </thead>
+ <tbody id="tbody">
+ </tbody>
+</table>
+</div>
+</body>
+</html>
