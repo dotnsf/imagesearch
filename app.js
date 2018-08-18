@@ -55,6 +55,7 @@ app.post( '/search', function( req, res ){
   res.contentType( 'application/json; charset=utf-8' );
   var _limit = req.query.limit ? req.query.limit : '';
   var limit = ( _limit ? parseInt( _limit ) : 5 );
+  var rev = ( req.query.rev ? true : false );
   console.log( 'POST /search?limit=' + limit );
 
   if( imagesearchdb ){
@@ -73,7 +74,7 @@ app.post( '/search', function( req, res ){
 
     easyimg.resize( options ).then(
       function( file ){
-        getPixels( dst_imgpath ).then( function( pixels ){
+        getPixels( dst_imgpath, true ).then( function( pixels ){
           imagesearchdb.list( { include_docs: true }, function( err, body ){
             if( err ){
               res.status( 400 );
@@ -405,7 +406,7 @@ app.delete( '/image/:id', function( req, res ){
 });
 
 
-function getPixels( filepath ){
+function getPixels( filepath, rev ){
   return new Promise( function( resolve, reject ){
     fs.readFile( filepath, function( err, data ){
       if( err ){
@@ -429,11 +430,14 @@ function getPixels( filepath ){
             var B = imagedata.data[idx+2];
             var A = imagedata.data[idx+3];
 
-            /*
-            R = 255 - R;
-            G = 255 - G;
-            B = 255 - B;
-            */
+            if( rev ){
+              R = 255 - R;
+              G = 255 - G;
+              B = 255 - B;
+            }
+            R = Math.floor( R / 4 );
+            G = Math.floor( G / 4 );
+            B = Math.floor( B / 4 );
 
             var pixel = [ R, G, B ];
             pixels.push( pixel );
@@ -448,7 +452,9 @@ function getPixels( filepath ){
 function countScore( pixels1, pixels2 ){
   var score = 0;
   for( var i = 0; i < pixels1.length; i ++ ){
+console.log( 'i=' + i + ' - ' + pixels1[i] + ' - ' + pixels2[i] );
     for( var j = 0; j < pixels1[i].length; j ++ ){
+console.log( ' j=' + j );
       var s = ( pixels1[i][j] - pixels2[i][j] ) * ( pixels1[i][j] - pixels2[i][j] );
       score += s;
     }

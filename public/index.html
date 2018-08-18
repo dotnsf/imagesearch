@@ -117,8 +117,8 @@ function resized(){
   var browserHeight = window.innerHeight;
   var canvas = document.getElementById( 'mycanvas' );
   if( canvas && canvas.getContext ){
-    canvas.width = browserWidth * 0.8;
-    canvas.height = browserHeight * 0.8;
+    canvas.width = 256; //browserWidth * 0.8;
+    canvas.height = 256; //browserHeight * 0.8;
   }
 }
 
@@ -161,6 +161,7 @@ function check(){
   console.log( 'Sending data... : ' + blob.size );
   var formData = new FormData();
   formData.append( 'image', blob );    //. <form enctype='multipart/formdata'><input name='image' type='file'/> ...
+  formData.append( 'rev', true );
   $.ajax({
     type: 'POST',
     url: '/search',
@@ -215,7 +216,7 @@ html, body{
 </select>
 
 <div id="canvas_div">
-  <canvas width="80%" height="50%" id="mycanvas">
+  <canvas width="256px" height="256px" id="mycanvas">
   </canvas>
 
   <br/>
