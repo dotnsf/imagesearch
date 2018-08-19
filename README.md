@@ -8,6 +8,17 @@
 
 
 
+## How to use
+
+### Training
+
+Access to training.html:  http(s)://xxxxxxxx/training.html
+
+### Find Similar Images
+
+Access to top page: http(s)://xxxxxxxx/
+
+
 ## Licensing
 
 This code is licensed under MIT.
