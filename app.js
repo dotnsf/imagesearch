@@ -68,6 +68,7 @@ app.post( '/search', function( req, res ){
     var options = {
       src: imgpath,
       dst: dst_imgpath,
+      ignoreAspectRatio: true,
       width: settings.image_size,
       height: settings.image_size
     };
@@ -75,6 +76,8 @@ app.post( '/search', function( req, res ){
     easyimg.resize( options ).then(
       function( file ){
         getPixels( dst_imgpath, true ).then( function( pixels ){
+          fs.unlink( imgpath, function(e){} );
+          fs.unlink( dst_imgpath, function(e){} );
           imagesearchdb.list( { include_docs: true }, function( err, body ){
             if( err ){
               res.status( 400 );
@@ -110,6 +113,8 @@ app.post( '/search', function( req, res ){
       }, function( err ){
         //. for Windows (??)
         getPixels( dst_imgpath ).then( function( pixels ){
+          fs.unlink( imgpath, function(e){} );
+          fs.unlink( dst_imgpath, function(e){} );
           imagesearchdb.list( { include_docs: true }, function( err, body ){
             if( err ){
               res.status( 400 );
@@ -165,6 +170,7 @@ app.post( '/image', function( req, res ){
     var options = {
       src: imgpath,
       dst: dst_imgpath,
+      ignoreAspectRatio: true,
       width: settings.image_size,
       height: settings.image_size
     };
@@ -443,6 +449,7 @@ function getPixels( filepath, rev ){
             pixels.push( pixel );
           }
         }
+        //console.log( '#pixels=' + pixels.length ); //. 4096 にならない？
         resolve( pixels );
       }
     });
@@ -452,9 +459,7 @@ function getPixels( filepath, rev ){
 function countScore( pixels1, pixels2 ){
   var score = 0;
   for( var i = 0; i < pixels1.length; i ++ ){
-console.log( 'i=' + i + ' - ' + pixels1[i] + ' - ' + pixels2[i] );
     for( var j = 0; j < pixels1[i].length; j ++ ){
-console.log( ' j=' + j );
       var s = ( pixels1[i][j] - pixels2[i][j] ) * ( pixels1[i][j] - pixels2[i][j] );
       score += s;
     }
