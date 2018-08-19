@@ -2,8 +2,8 @@ swagger: '2.0'
 info:
   description: Image Search API Document
   version: 0.0.1
-  title: HashchainDB Platform REST API
-host: 192.168.0.12:6040
+  title: Image Search Platform REST API
+host: localhost:3000
 basePath: /
 tags:
   - name: image
@@ -143,4 +143,3 @@ paths:
           description: Success
         '401':
           description: Access error
-
