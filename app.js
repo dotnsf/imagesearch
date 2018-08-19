@@ -69,6 +69,7 @@ app.post( '/search', function( req, res ){
       src: imgpath,
       dst: dst_imgpath,
       ignoreAspectRatio: true,
+      background: 'white',
       width: settings.image_size,
       height: settings.image_size
     };
@@ -184,6 +185,7 @@ app.post( '/image', function( req, res ){
     var options = {
       src: imgpath,
       dst: dst_imgpath,
+      background: 'white',
       ignoreAspectRatio: true,
       width: settings.image_size,
       height: settings.image_size
@@ -420,6 +422,43 @@ app.delete( '/image/:id', function( req, res ){
             res.end();
           }
         });
+      }
+    });
+  }else{
+    res.status( 400 );
+    res.write( JSON.stringify( { status: false, message: 'db is failed to initialize.' }, 2, null ) );
+    res.end();
+  }
+});
+
+app.post( '/reset', function( req, res ){
+  res.contentType( 'application/json; charset=utf-8' );
+  console.log( 'POST /reset' );
+
+  if( imagesearchdb ){
+    imagesearchdb.list( { include_docs: true }, function( err, body ){
+      if( err ){
+        res.status( 400 );
+        res.write( JSON.stringify( { status: false, message: err }, 2, null ) );
+        res.end();
+      }else{
+        var docs = [];
+        body.rows.forEach( function( doc ){
+          var _doc = JSON.parse(JSON.stringify(doc.doc));
+          if( _doc.pixels && _doc.pixels.length ){
+            docs.push( { _id: _doc._id, _rev: _doc._rev, _deleted: true } );
+          }
+        });
+
+        if( docs.length > 0 ){
+          imagesearchdb.bulk( { docs: docs }, function( err ){
+            res.write( JSON.stringify( { status: true, message: docs.length + ' images are deleted.' }, 2, null ) );
+            res.end();
+          });
+        }else{
+          res.write( JSON.stringify( { status: true, message: 'No images need to be deleted.' }, 2, null ) );
+          res.end();
+        }
       }
     });
   }else{
