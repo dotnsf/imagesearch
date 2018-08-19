@@ -161,7 +161,7 @@ function check(){
   console.log( 'Sending data... : ' + blob.size );
   var formData = new FormData();
   formData.append( 'image', blob );    //. <form enctype='multipart/formdata'><input name='image' type='file'/> ...
-  formData.append( 'rev', true );
+  //formData.append( 'rev', true );
   $.ajax({
     type: 'POST',
     url: '/search',
