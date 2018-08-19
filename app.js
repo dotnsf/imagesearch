@@ -84,25 +84,31 @@ app.post( '/search', function( req, res ){
               res.write( JSON.stringify( { status: false, message: err }, 2, null ) );
               res.end();
             }else{
-              var docs = [];
+              var docs0 = [];
               body.rows.forEach( function( doc ){
                 var _doc = JSON.parse(JSON.stringify(doc.doc));
-                if( _doc._id.indexOf( '_' ) !== 0 ){
-                  //. スコア計算
-                  var score = countScore( pixels, _doc.pixels );
-                  _doc.score = score;
-                  delete _doc['pixels'];
-
-                  docs.push( _doc );
+                if( _doc.pixels && _doc.pixels.length ){
+                  docs0.push( _doc );
                 }
               });
+              var docs = [];
+              docs0.forEach( function( doc ){
+                //. スコア計算
+                countScore( pixels, doc.pixels ).then( function( score ){
+                  doc.score = score;
+                  delete doc['pixels'];
+                  docs.push( doc );
 
-              docs.sort( compareByScore ); //. スコアの小さい順にソート
-              docs = docs.slice( 0, limit );
+                  if( docs.length == docs0.length ){
+                    docs.sort( compareByScore ); //. スコアの小さい順にソート
+                    docs = docs.slice( 0, limit );
 
-              var result = { status: true, docs: docs };
-              res.write( JSON.stringify( result, 2, null ) );
-              res.end();
+                    var result = { status: true, docs: docs };
+                    res.write( JSON.stringify( result, 2, null ) );
+                    res.end();
+                  }
+                });
+              });
             }
           });
         }, function( err ){
@@ -122,25 +128,31 @@ app.post( '/search', function( req, res ){
               res.write( JSON.stringify( { status: false, message: err }, 2, null ) );
               res.end();
             }else{
-              var docs = [];
+              var docs0 = [];
               body.rows.forEach( function( doc ){
                 var _doc = JSON.parse(JSON.stringify(doc.doc));
-                if( _doc._id.indexOf( '_' ) !== 0 ){
-                  //. スコア計算
-                  var score = countScore( pixels, _doc.pixels );
-                  _doc.score = score;
-                  delete _doc['pixels'];
-
-                  docs.push( _doc );
+                if( _doc.pixels && _doc.pixels.length ){
+                  docs0.push( _doc );
                 }
               });
+              var docs = [];
+              docs0.forEach( function( doc ){
+                //. スコア計算
+                countScore( pixels, doc.pixels ).then( function( score ){
+                  doc.score = score;
+                  delete doc['pixels'];
+                  docs.push( doc );
 
-              docs.sort( compareByScore ); //. スコアの小さい順にソート
-              docs = docs.slice( 0, limit );
+                  if( docs.length == docs0.length ){
+                    docs.sort( compareByScore ); //. スコアの小さい順にソート
+                    docs = docs.slice( 0, limit );
 
-              var result = { status: true, docs: docs };
-              res.write( JSON.stringify( result, 2, null ) );
-              res.end();
+                    var result = { status: true, docs: docs };
+                    res.write( JSON.stringify( result, 2, null ) );
+                    res.end();
+                  }
+                });
+              });
             }
           });
         }, function( err ){
@@ -463,15 +475,17 @@ function getPixels( filepath, rev ){
 }
 
 function countScore( pixels1, pixels2 ){
-  var score = 0;
-  for( var i = 0; i < pixels1.length; i ++ ){
-    for( var j = 0; j < pixels1[i].length; j ++ ){
-      var s = ( pixels1[i][j] - pixels2[i][j] ) * ( pixels1[i][j] - pixels2[i][j] );
-      score += s;
+  return new Promise( function( resolve, reject ){
+    var score = 0;
+    for( var i = 0; i < pixels1.length; i ++ ){
+      for( var j = 0; j < pixels1[i].length; j ++ ){
+        var s = ( pixels1[i][j] - pixels2[i][j] ) * ( pixels1[i][j] - pixels2[i][j] );
+        score += s;
+      }
     }
-  }
-
-  return score;
+  
+    resolve( score );
+  });
 }
 
 function compareByTimestamp( a, b ){
