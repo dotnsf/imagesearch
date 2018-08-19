@@ -61,7 +61,7 @@ app.post( '/search', function( req, res ){
   if( imagesearchdb ){
     var imgpath = req.file.path;
     var imgtype = req.file.mimetype;
-    var imgname = req.file.originalname;
+    var imgname = req.file.originalname; //. "blob"
 
     //. https://www.npmjs.com/package/easyimage
     var dst_imgpath = imgpath + '.png';
@@ -91,6 +91,7 @@ app.post( '/search', function( req, res ){
                   //. スコア計算
                   var score = countScore( pixels, _doc.pixels );
                   _doc.score = score;
+                  delete _doc['pixels'];
 
                   docs.push( _doc );
                 }
@@ -128,6 +129,7 @@ app.post( '/search', function( req, res ){
                   //. スコア計算
                   var score = countScore( pixels, _doc.pixels );
                   _doc.score = score;
+                  delete _doc['pixels'];
 
                   docs.push( _doc );
                 }
@@ -208,7 +210,7 @@ app.post( '/image', function( req, res ){
               res.end();
             }else{
               //console.log( body );
-              res.write( JSON.stringify( { status: true, pixels: pixels, message: body }, 2, null ) );
+              res.write( JSON.stringify( { status: true, /*pixels: pixels,*/ message: body }, 2, null ) );
               res.end();
             }
           });
@@ -251,7 +253,7 @@ app.post( '/image', function( req, res ){
               res.end();
             }else{
               //console.log( body );
-              res.write( JSON.stringify( { status: true, pixels: pixels, message: body }, 2, null ) );
+              res.write( JSON.stringify( { status: true, /*pixels: pixels,*/ message: body }, 2, null ) );
               res.end();
             }
           });
@@ -274,6 +276,7 @@ app.get( '/image/:id', function( req, res ){
   res.contentType( 'application/json; charset=utf-8' );
   var id = req.params.id;
   console.log( 'GET /image/' + id );
+  var include_pixels = ( req.query.include_pixels ? true : false );
 
   if( imagesearchdb ){
     imagesearchdb.get( id, { include_docs: true }, function( err, doc ){
@@ -282,6 +285,9 @@ app.get( '/image/:id', function( req, res ){
         res.write( JSON.stringify( { status: false, message: err }, 2, null ) );
         res.end();
       }else{
+        if( !include_pixels ){
+          delete doc['pixels'];
+        }
         res.write( JSON.stringify( { status: true, doc: doc }, 2, null ) );
         res.end();
       }

@@ -1,0 +1,146 @@
+swagger: '2.0'
+info:
+  description: Image Search API Document
+  version: 0.0.1
+  title: HashchainDB Platform REST API
+host: 192.168.0.12:6040
+basePath: /
+tags:
+  - name: image
+    description: APIs for document(s)
+schemes:
+  - http
+  - https
+paths:
+  /search:
+    post:
+      tags:
+        - image
+      summary: Search similar images
+      description: Search similar images
+      produces:
+        - application/json
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: image
+          in: formData
+          type: file
+          required: true
+          description: image file
+        - name: limit
+          in: query
+          required: false
+          description: maximum amount of result
+        - name: rev
+          in: query
+          required: false
+          description: reverse comparison
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Access error
+  /image:
+    post:
+      tags:
+        - image
+      summary: Post image
+      description: Save new image
+      produces:
+        - application/json
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: image
+          in: formData
+          type: file
+          required: true
+          description: image file
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Access error
+  /image/{id}:
+    get:
+      tags:
+        - image
+      summary: Get single image
+      description: Get single image
+      parameters:
+        - name: id
+          type: string
+          in: path
+          description: id of image
+          required: true
+        - name: include_pixels
+          type: string
+          in: query
+          description: specify 1 to include pixels data in result
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Access error
+    delete:
+      tags:
+        - image
+      summary: Delete single image
+      description: Delete single images
+      parameters:
+        - name: id
+          type: string
+          in: path
+          description: id of image
+          required: true
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Access error
+  /attachment/{id}:
+    get:
+      tags:
+        - image
+      summary: Get single attachment
+      description: Get single attachment with content-type
+      parameters:
+        - name: id
+          type: string
+          in: path
+          description: id of image
+          required: true
+        - name: key
+          type: string
+          in: query
+          required: false
+          description: dst_file to get thumbnail, other for original one
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Access error
+  /images:
+    get:
+      tags:
+        - image
+      summary: Get images
+      description: Get images
+      produces:
+        - application/json
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: maximum amount of result
+        - name: offset
+          in: query
+          required: false
+          description: result's offset
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Access error
+
