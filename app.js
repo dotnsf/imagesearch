@@ -56,6 +56,7 @@ app.post( '/search', function( req, res ){
   var _limit = req.query.limit ? req.query.limit : '';
   var limit = ( _limit ? parseInt( _limit ) : 5 );
   var rev = ( req.query.rev ? true : false );
+  var grayscale = ( req.body.grayscale ? true : false );
   console.log( 'POST /search?limit=' + limit );
 
   if( imagesearchdb ){
@@ -76,7 +77,7 @@ app.post( '/search', function( req, res ){
 
     easyimg.resize( options ).then(
       function( file ){
-        getPixels( dst_imgpath, true ).then( function( pixels ){
+        getPixels( dst_imgpath, rev ).then( function( pixels ){
           fs.unlink( imgpath, function(e){} );
           fs.unlink( dst_imgpath, function(e){} );
           imagesearchdb.list( { include_docs: true }, function( err, body ){
@@ -95,7 +96,7 @@ app.post( '/search', function( req, res ){
               var docs = [];
               docs0.forEach( function( doc ){
                 //. スコア計算
-                countScore( pixels, doc.pixels ).then( function( score ){
+                countScore( pixels, doc.pixels, grayscale ).then( function( score ){
                   doc.score = score;
                   delete doc['pixels'];
                   docs.push( doc );
@@ -120,7 +121,7 @@ app.post( '/search', function( req, res ){
         });
       }, function( err ){
         //. for Windows (??)
-        getPixels( dst_imgpath ).then( function( pixels ){
+        getPixels( dst_imgpath, rev ).then( function( pixels ){
           fs.unlink( imgpath, function(e){} );
           fs.unlink( dst_imgpath, function(e){} );
           imagesearchdb.list( { include_docs: true }, function( err, body ){
@@ -139,7 +140,7 @@ app.post( '/search', function( req, res ){
               var docs = [];
               docs0.forEach( function( doc ){
                 //. スコア計算
-                countScore( pixels, doc.pixels ).then( function( score ){
+                countScore( pixels, doc.pixels, grayscale ).then( function( score ){
                   doc.score = score;
                   delete doc['pixels'];
                   docs.push( doc );
@@ -513,16 +514,24 @@ function getPixels( filepath, rev ){
   });
 }
 
-function countScore( pixels1, pixels2 ){
+function countScore( pixels1, pixels2, grayscale ){
   return new Promise( function( resolve, reject ){
     var score = 0;
+    if( grayscale ){
+      for( var i = 0; i < pixels1.length; i ++ ){
+        var v1 = Math.floor( ( pixels1[i][0] + pixels1[i][1] + pixels1[i][2] ) / 3 );
+        pixels1[i][0] = pixels1[i][1] = pixels1[i][2] = v1;
+        var v2 = Math.floor( ( pixels2[i][0] + pixels2[i][1] + pixels2[i][2] ) / 3 );
+        pixels2[i][0] = pixels2[i][1] = pixels2[i][2] = v2;
+      }
+    }
     for( var i = 0; i < pixels1.length; i ++ ){
       for( var j = 0; j < pixels1[i].length; j ++ ){
         var s = ( pixels1[i][j] - pixels2[i][j] ) * ( pixels1[i][j] - pixels2[i][j] );
         score += s;
       }
     }
-  
+
     resolve( score );
   });
 }

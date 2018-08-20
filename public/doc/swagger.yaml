@@ -3,7 +3,7 @@ info:
   description: Image Search API Document
   version: 0.0.1
   title: Image Search Platform REST API
-host: localhost:3000
+host: localhost:6035
 basePath: /
 tags:
   - name: image
@@ -33,13 +33,19 @@ paths:
           required: false
           description: maximum amount of result
         - name: rev
-          in: query
+          in: formData
+          type: boolean
           required: false
           description: reverse comparison
+        - name: grayscale
+          in: formData
+          type: boolean
+          required: false
+          description: compare after grayscaled
       responses:
         '200':
           description: Success
-        '401':
+        '400':
           description: Access error
   /image:
     post:
@@ -60,7 +66,7 @@ paths:
       responses:
         '200':
           description: Success
-        '401':
+        '400':
           description: Access error
   /image/{id}:
     get:
@@ -81,7 +87,7 @@ paths:
       responses:
         '200':
           description: Success
-        '401':
+        '400':
           description: Access error
     delete:
       tags:
@@ -97,7 +103,7 @@ paths:
       responses:
         '200':
           description: Success
-        '401':
+        '400':
           description: Access error
   /attachment/{id}:
     get:
@@ -119,7 +125,7 @@ paths:
       responses:
         '200':
           description: Success
-        '401':
+        '400':
           description: Access error
   /images:
     get:
@@ -141,5 +147,18 @@ paths:
       responses:
         '200':
           description: Success
-        '401':
+        '400':
+          description: Access error
+  /reset:
+    post:
+      tags:
+        - image
+      summary: Reset images
+      description: Delete all images from db
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Success
+        '400':
           description: Access error
