@@ -59,8 +59,10 @@ $(function(){
     //. タッチが動いたら座標値を取得
     var t = e.changedTouches[0];
     var rect = e.target.getBoundingClientRect();
-    mouse.x = e.pageX - rect.left - borderWidth;
-    mouse.y = e.pageY - rect.top - borderWidth;
+    //mouse.x = e.pageX - rect.left - borderWidth;
+    //mouse.y = e.pageY - rect.top - borderWidth;
+    mouse.x = ( isAndroid() ? t.pageX : e.pageX ) - rect.left - borderWidth;
+    mouse.y = ( isAndroid() ? t.pageY : e.pageY ) - rect.top - borderWidth;
 
     //. isDrawがtrueのとき描画
     if( mouse.isDrawing ){
@@ -105,9 +107,15 @@ $(function(){
   });
 
   //. スクロール禁止
+  /*
   $(window).on('touchmove.noScroll', function( e ){
     e.preventDefault();
   });
+  */
+  var movefun = function( event ){
+    event.preventDefault();
+  }
+  window.addEventListener( 'touchmove', movefun, { passive: false } );
 
   resetCanvas();
 });
@@ -176,6 +184,10 @@ function check(){
       console.log( textStatus + ': ' + errorThrown );
     }
   });
+}
+
+function isAndroid(){
+  return ( navigator.userAgent.indexOf( 'Android' ) > 0 );
 }
 </script>
 <style type="text/css">
